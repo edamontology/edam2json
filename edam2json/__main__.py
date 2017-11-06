@@ -24,7 +24,7 @@ def get_json_ld(edam_owl_file):
 
     context["next_id"] = "http://edamontology.org/next_id"
 
-    edam_json_ld = json.loads(g.serialize(format='json-ld', context=context, indent=4))
+    edam_json_ld = json.loads(g.serialize(format='json-ld', context=context, indent=4).decode('utf-8'))
     return edam_json_ld
 
 def listify(obj, key):
@@ -53,8 +53,8 @@ def process_node(node, json_ld, extended):
 
 def print_jsonld(args):
     json_ld = get_json_ld(args.file)
-    print(json.dumps(json_ld, sort_keys=True,
-                  indent=4, separators=(',', ': ')))
+    json.dump(json_ld, args.output, sort_keys=True,
+                 indent=4, separators=(',', ': '))
 
 def print_biotools(args):
     json_ld = get_json_ld(args.file) 
@@ -65,13 +65,13 @@ def print_biotools(args):
         print('Cannot find term "' + root +'" in EDAM ontology')
         return
     biotools_node = process_node(root_node, json_ld, args.extended)
-    print(json.dumps(biotools_node, sort_keys=True,
-                  indent=4, separators=(',', ': ')))
+    json.dump(biotools_node, args.output, sort_keys=True,
+                  indent=4, separators=(',', ': '))
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(
                  description='EDAM file import tool')
-    parser.add_argument('file',
+    parser.add_argument('file',type=argparse.FileType('r'),
                         help="path to the EDAM file")
     subparsers = parser.add_subparsers(dest='action')
     subparsers.required = True
@@ -81,5 +81,7 @@ if __name__ == '__main__':
     parser_biotools.add_argument('--root',default='http://edamontology.org/topic_0003')
     parser_biotools.add_argument('--extended', action='store_true')
     parser_biotools.set_defaults(func=print_biotools)
+    parser.add_argument('--output', '-o', type=argparse.FileType('w'), default='-',
+                        help="path to the output file")
     args = parser.parse_args()
     args.func(args)
