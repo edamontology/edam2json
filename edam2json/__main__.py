@@ -36,11 +36,15 @@ def process_node(node, json_ld, extended):
                      'children':[]}
     text = node.get('rdfs:label')
     if text is not None:
-        node['text'] = text
-    biotools_node['exact_synonyms'] = node.get('oboInOwl:hasExactSynonym',[])
-    biotools_node['narrow_synonyms'] = node.get('oboInOwl:hasNarrowSynonym',[])
-    biotools_node['consider'] = node.get('oboInOwl:consider',[])
-    biotools_node['replacedBy'] = node.get('oboInOwl:replacedBy',[])
+        biotools_node['text'] = text
+    if node.get('oboInOwl:hasExactSynonym'):
+        biotools_node['exact_synonyms'] = listify(node, 'oboInOwl:hasExactSynonym')
+    if node.get('oboInOwl:hasNarrowSynonym'):
+        biotools_node['narrow_synonyms'] = listify(node, 'oboInOwl:hasNarrowSynonym')
+    if node.get('oboInOwl:consider'):
+        biotools_node['consider'] = [n['@id'] for n in listify(node, 'oboInOwl:consider')]
+    if node.get('oboInOwl:replacedBy'):
+        biotools_node['replacedBy'] = [n['@id'] for n in listify(node, 'oboInOwl:replacedBy')]
     if extended:
         description = node.get('oboInOwl:hasDefinition')
         if description is not None:
@@ -49,6 +53,8 @@ def process_node(node, json_ld, extended):
         subclass_of = listify(term,'rdfs:subClassOf')
         if {'@id':node['@id']} in subclass_of:
             biotools_node['children'].append(process_node(term, json_ld, extended))
+    if len(biotools_node['children'])==0:
+        del biotools_node['children']
     return biotools_node
 
 def print_jsonld(args):
