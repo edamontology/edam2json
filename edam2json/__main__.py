@@ -54,6 +54,13 @@ def process_node(node, json_ld, extended):
             biotools_node['definition'] = description
         else:
             logging.error("missing definition for term %s" % node['@id'])
+        superclasses = listify(node,'rdfs:subClassOf')
+        for superclass in superclasses:
+            if superclass['@id'].startswith('_:'):
+                term = [term for term in json_ld['@graph'] if term['@id']==superclass['@id']][0]
+                property_name = term['owl:onProperty']['@id'].replace('http://edamontology.org/','')
+                property_value = term['owl:someValuesFrom']['@id']
+                biotools_node[property_name] = biotools_node.get(property_name,[]) + [property_value]
     for term in json_ld['@graph']:
         subclass_of = listify(term,'rdfs:subClassOf')
         if {'@id':node['@id']} in subclass_of:
@@ -76,11 +83,12 @@ def print_biotools(args):
         print('Cannot find term "' + root +'" in EDAM ontology')
         return
     biotools_node = process_node(root_node, json_ld, args.extended)
-    meta_node = [term for term in json_ld['@graph'] if term['@id']=='http://edamontology.org'][0]
-    biotools_node['meta'] = {
-        'version': meta_node['doap:Version'],
-        'date': meta_node['oboOther:date']
-    }
+    if args.extended:
+        meta_node = [term for term in json_ld['@graph'] if term['@id']=='http://edamontology.org'][0]
+        biotools_node['meta'] = {
+            'version': meta_node['doap:Version'],
+            'date': meta_node['oboOther:date']
+        }
     json.dump(biotools_node, args.output, sort_keys=True,
                   indent=4, separators=(',', ': '))
 
