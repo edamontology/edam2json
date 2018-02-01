@@ -34,9 +34,12 @@ def listify(obj, key):
 def process_node(node, json_ld, extended):
     biotools_node = {'data': {'uri': node['@id']},
                      'children':[]}
+    logging.debug("processing term %s" % node['@id'])
     text = node.get('rdfs:label')
     if text is not None:
         biotools_node['text'] = text
+    else:
+        logging.error("missing label for term %s" % node['@id'])
     if node.get('oboInOwl:hasExactSynonym'):
         biotools_node['exact_synonyms'] = listify(node, 'oboInOwl:hasExactSynonym')
     if node.get('oboInOwl:hasNarrowSynonym'):
@@ -49,6 +52,8 @@ def process_node(node, json_ld, extended):
         description = node.get('oboInOwl:hasDefinition')
         if description is not None:
             biotools_node['definition'] = description
+        else:
+            logging.error("missing definition for term %s" % node['@id'])
     for term in json_ld['@graph']:
         subclass_of = listify(term,'rdfs:subClassOf')
         if {'@id':node['@id']} in subclass_of:
@@ -71,6 +76,11 @@ def print_biotools(args):
         print('Cannot find term "' + root +'" in EDAM ontology')
         return
     biotools_node = process_node(root_node, json_ld, args.extended)
+    meta_node = [term for term in json_ld['@graph'] if term['@id']=='http://edamontology.org'][0]
+    biotools_node['meta'] = {
+        'version': meta_node['doap:Version'],
+        'date': meta_node['oboOther:date']
+    }
     json.dump(biotools_node, args.output, sort_keys=True,
                   indent=4, separators=(',', ': '))
 
