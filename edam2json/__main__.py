@@ -63,7 +63,7 @@ def process_node(node, json_ld, extended):
                 biotools_node[property_name] = biotools_node.get(property_name,[]) + [property_value]
     for term in json_ld['@graph']:
         subclass_of = listify(term,'rdfs:subClassOf')
-        if {'@id':node['@id']} in subclass_of:
+        if {'@id': node['@id']} in subclass_of:
             biotools_node['children'].append(process_node(term, json_ld, extended))
     if len(biotools_node['children'])==0:
         del biotools_node['children']
@@ -77,12 +77,22 @@ def print_jsonld(args):
 def print_biotools(args):
     json_ld = get_json_ld(args.file) 
     root = args.root
-    try:
-        root_node = [term for term in json_ld['@graph'] if term['@id']==root][0]
-    except IndexError:
-        print('Cannot find term "' + root +'" in EDAM ontology')
-        return
-    biotools_node = process_node(root_node, json_ld, args.extended)
+    if root:
+        try:
+            root_node = [term for term in json_ld['@graph'] if term['@id']==root][0]
+        except IndexError:
+            print('Cannot find term "' + root +'" in EDAM ontology')
+            return
+        biotools_node = process_node(root_node, json_ld, args.extended)
+    else:
+        subroot_nodes =  [term for term in json_ld['@graph'] if term['@type']=='owl:Class' 
+                            and 'rdfs:subClassOf' not in term 
+                            and term['@id'].startswith('http://edamontology.org')
+                            or term['@id'].startswith('owl:')]
+        biotools_node = {'data': {'uri': 'owl:Thing'},
+                     'children':[]}
+        for subroot_node in subroot_nodes:
+            biotools_node['children'].append(process_node(subroot_node, json_ld, args.extended))
     if args.extended:
         meta_node = [term for term in json_ld['@graph'] if term['@id']=='http://edamontology.org'][0]
         biotools_node['meta'] = {
@@ -102,7 +112,7 @@ def main():
     parser_jsonld = subparsers.add_parser('jsonld')
     parser_jsonld.set_defaults(func=print_jsonld)
     parser_biotools = subparsers.add_parser('biotools')
-    parser_biotools.add_argument('--root',default='http://edamontology.org/topic_0003')
+    parser_biotools.add_argument('--root')
     parser_biotools.add_argument('--extended', action='store_true')
     parser_biotools.set_defaults(func=print_biotools)
     parser.add_argument('--output', '-o', type=argparse.FileType('w'), default='-',
