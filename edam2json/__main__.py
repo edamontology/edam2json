@@ -93,12 +93,11 @@ def print_biotools(args):
                      'children':[]}
         for subroot_node in subroot_nodes:
             biotools_node['children'].append(process_node(subroot_node, json_ld, args.extended))
-    if args.extended:
-        meta_node = [term for term in json_ld['@graph'] if term['@id']=='http://edamontology.org'][0]
-        biotools_node['meta'] = {
-            'version': meta_node['doap:Version'],
-            'date': meta_node['oboOther:date']
-        }
+    meta_node = [term for term in json_ld['@graph'] if term['@id']=='http://edamontology.org'][0]
+    biotools_node['meta'] = {
+        'version': meta_node['doap:Version'],
+        'date': meta_node['oboOther:date']
+    }
     json.dump(biotools_node, args.output, sort_keys=True,
                   indent=4, separators=(',', ': '))
 
