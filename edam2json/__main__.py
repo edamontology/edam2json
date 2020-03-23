@@ -97,8 +97,11 @@ def print_biotools(args):
             biotools_node['children'].append(process_node(subroot_node, json_ld, args.extended))
     if args.extended:
         meta_node = [term for term in json_ld['@graph'] if term['@id']=='http://edamontology.org'][0]
+        version = meta_node['doap:Version']
+        if isinstance(version, dict) and '@value' in version:
+            version = version['@value']
         biotools_node['meta'] = {
-            'version': meta_node['doap:Version'],
+            'version': version,
             'date': meta_node['oboOther:date']
         }
     json.dump(biotools_node, args.output, sort_keys=True,
