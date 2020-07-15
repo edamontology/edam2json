@@ -56,6 +56,8 @@ def process_node(node, json_ld, extended):
             logging.error("missing definition for term %s" % node['@id'])
         if node.get('rdfs:comment'):
             biotools_node['comment'] = listify(node, 'rdfs:comment')
+        if node.get('rdfs:seeAlso'):
+            biotools_node['see_also'] = listify(node, 'rdfs:seeAlso')
         superclasses = listify(node,'rdfs:subClassOf')
         for superclass in superclasses:
             if superclass['@id'].startswith('_:'):
