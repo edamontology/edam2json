@@ -74,7 +74,7 @@ def process_node(node, json_ld, extended):
 def print_jsonld(args):
     json_ld = get_json_ld(args.file)
     json.dump(json_ld, args.output, sort_keys=True,
-                 indent=4, separators=(',', ': '))
+                 indent=None if args.minified else 4, separators=(',', ': '))
 
 def print_biotools(args):
     json_ld = get_json_ld(args.file) 
@@ -102,7 +102,7 @@ def print_biotools(args):
             'date': meta_node['oboOther:date']
         }
     json.dump(biotools_node, args.output, sort_keys=True,
-                  indent=4, separators=(',', ': '))
+                  indent=None if args.minified else 4, separators=(',', ': '))
 
 def main():
     parser = argparse.ArgumentParser(
@@ -116,6 +116,7 @@ def main():
     parser_biotools = subparsers.add_parser('biotools')
     parser_biotools.add_argument('--root')
     parser_biotools.add_argument('--extended', action='store_true')
+    parser_biotools.add_argument('--minified', action='store_true')
     parser_biotools.set_defaults(func=print_biotools)
     parser.add_argument('--output', '-o', type=argparse.FileType('w'), default='-',
                         help="path to the output file")
