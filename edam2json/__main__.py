@@ -32,6 +32,15 @@ def listify(obj, key):
     return value if isinstance(value, list) else [value]
 
 def process_node(node, json_ld, extended):
+    try:
+        biotools_node = process_node_itself(node, json_ld, extended)
+    except Exception as e:
+        logging.error("Error when creating node %s" % node['@id'])
+        raise e
+    return process_node_children(biotools_node, node, json_ld, extended)
+
+
+def process_node_itself(node, json_ld, extended):
     biotools_node = {'data': {'uri': node['@id']},
                      'children':[]}
     logging.debug("processing term %s" % node['@id'])
@@ -65,6 +74,10 @@ def process_node(node, json_ld, extended):
                 property_name = term['owl:onProperty']['@id'].replace('http://edamontology.org/','')
                 property_value = term['owl:someValuesFrom']['@id']
                 biotools_node[property_name] = biotools_node.get(property_name,[]) + [property_value]
+    return biotools_node
+
+
+def process_node_children(biotools_node, node, json_ld, extended):
     for term in json_ld['@graph']:
         subclass_of = listify(term,'rdfs:subClassOf')
         if {'@id': node['@id']} in subclass_of:
