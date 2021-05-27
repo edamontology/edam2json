@@ -117,6 +117,9 @@ def print_biotools(args):
             version = version['@value']
         biotools_node['meta'] = {
             'version': version,
+            'logo': meta_node.get('foaf:logo', None),
+            'homepage': meta_node.get('foaf:page', None),
+            'repository': meta_node.get('edam:repository', None),
             'date': meta_node['oboOther:date']
         }
     json.dump(biotools_node, args.output, sort_keys=True,
