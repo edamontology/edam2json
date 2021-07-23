@@ -11,7 +11,7 @@ from rdflib.serializer import Serializer
 from rdflib.extras.infixowl import AllProperties
 
 def get_json_ld(edam_owl_file):
-    g = Graph().parse(edam_owl_file)
+    g = Graph().parse(edam_owl_file.name)
     context = {}
 
     for ns in g.namespaces():
@@ -24,7 +24,7 @@ def get_json_ld(edam_owl_file):
 
     context["next_id"] = "http://edamontology.org/next_id"
 
-    edam_json_ld = json.loads(g.serialize(format='json-ld', context=context, indent=4).decode('utf-8'))
+    edam_json_ld = json.loads(g.serialize(format='json-ld', context=context, indent=4))
     return edam_json_ld
 
 def listify(obj, key):
