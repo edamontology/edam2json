@@ -4,7 +4,7 @@ import os, sys
 from setuptools import setup, find_packages
 
 NAME = "edam2json"
-VERSION = "dev"
+VERSION = "1.0dev1"
 
 SETUP_DIR = os.path.dirname(__file__)
 README = os.path.join(SETUP_DIR, 'README.md')
