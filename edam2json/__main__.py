@@ -102,10 +102,12 @@ def print_biotools(args):
             return
         biotools_node = process_node(root_node, json_ld, args.extended)
     else:
-        subroot_nodes =  [term for term in json_ld['@graph'] if term['@type']=='owl:Class' 
+        subroot_nodes =  [term for term in json_ld['@graph'] if '@type' in term 
+                            and term['@type']=='owl:Class' 
                             and 'rdfs:subClassOf' not in term 
                             and term['@id'].startswith('http://edamontology.org')
-                            or term['@id'].startswith('owl:')]
+                            #or term['@id'].startswith('owl:')
+                         ]
         biotools_node = {'data': {'uri': 'owl:Thing'},
                      'children':[]}
         for subroot_node in subroot_nodes:
