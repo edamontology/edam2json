@@ -121,8 +121,8 @@ def print_biotools(args):
             'version': version,
             'logo': meta_node.get('foaf:logo', None),
             'homepage': meta_node.get('foaf:page', None),
-            'repository': meta_node.get('edam:repository', None),
-            'date': meta_node['oboOther:date']
+            'repository': meta_node.get('repository', None),
+            'date': meta_node['oboLegacy:date']
         }
     json.dump(biotools_node, args.output, sort_keys=True,
                   indent=None if args.minified else 4, separators=(',', ': '))
