@@ -135,6 +135,7 @@ def main():
     subparsers = parser.add_subparsers(dest='action')
     subparsers.required = True
     parser_jsonld = subparsers.add_parser('jsonld')
+    parser_jsonld.add_argument('--minified', action='store_true')
     parser_jsonld.set_defaults(func=print_jsonld)
     parser_biotools = subparsers.add_parser('biotools')
     parser_biotools.add_argument('--root')
